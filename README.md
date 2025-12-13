@@ -1,4 +1,4 @@
-# NoteThat 📝
+# NoteThat V(0.1)📝
 
 A notes app mainly for **EndeavourOS**, made in **C++**.
 
