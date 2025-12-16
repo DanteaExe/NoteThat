@@ -8,8 +8,8 @@ class DocumentManager
 {
 private:
     Glib::RefPtr<Gtk::TextBuffer> buffer;
-    std::string currentFile; //which file is open?
-    bool isModified = false; //are there changes unsave?
+    std::string currentFile; // which file is open?
+    bool isModified = false; // are there unsave changes?
     std::function<void(const std::string&)> onSaveCallback;
 
 private:
@@ -21,6 +21,7 @@ private:
             std::cerr << "Could not open file for writing\n";
             return;
         }
+        
         out << buffer->get_text();
         out.close();
         
@@ -34,10 +35,35 @@ private:
             onSaveCallback(path);
     }
 
+    void ReadFromFile(const std::string& path)
+    {
+        std::ifstream in(path);
+        if (!in)
+        {
+            std::cerr << "Could not open file for reading\n";
+            return;
+        }
+        
+        std::string content(
+            (std::istreambuf_iterator<char>(in)),
+            std::istreambuf_iterator<char>()
+        );
+        
+        buffer->set_text(content);
+        currentFile = path;
+        isModified = false;
+        
+        std::cout << "Opened file: " << path << std::endl;
+        
+        // Notificar que se abrió exitosamente
+        if (onSaveCallback)
+            onSaveCallback(path);
+    }
+
 public:
     DocumentManager(Glib::RefPtr<Gtk::TextBuffer> buffer)
+        : buffer(buffer)
     {
-        this.buffer = buffer;
     }
 
     // Getters
@@ -47,7 +73,7 @@ public:
     // Setters
     void SetModified(bool modified) { isModified = modified; }
     
-    // Callback para cuando se guarda exitosamente
+    // Callback para cuando se guarda/abre exitosamente
     void SetOnSaveCallback(std::function<void(const std::string&)> callback)
     {
         onSaveCallback = callback;
@@ -85,6 +111,34 @@ public:
                 catch (const Glib::Error& ex)
                 {
                     std::cerr << "Save failed: " << ex.what() << std::endl;
+                }
+            }
+        );
+    }
+
+    void Open(Gtk::Window& parent)
+    {
+        auto dialog = Gtk::FileDialog::create();
+        dialog->set_title("Open File");
+        dialog->open(
+            parent,
+            [this, dialog](const Glib::RefPtr<Gio::AsyncResult>& result)
+            {
+                try
+                {
+                    auto file = dialog->open_finish(result);
+                    if (!file)
+                        return;
+                    
+                    auto path = file->get_path();
+                    if (path.empty())
+                        return;
+                    
+                    ReadFromFile(path);
+                }
+                catch (const Glib::Error& ex)
+                {
+                    std::cerr << "Open failed: " << ex.what() << std::endl;
                 }
             }
         );
