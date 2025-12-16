@@ -5,22 +5,22 @@
 class EditorView
 {
 private:
-    Glib::RefPtr<Gtk::TextBuffer> buffer;
-    Gtk::TextView* textView;
-    Gtk::ScrolledWindow* scrolled;
-    
+    Glib::RefPtr<Gtk::TextBuffer> buffer; //memory text
+    Gtk::TextView* textView; //where we see text
+    Gtk::ScrolledWindow* scrolled; //just for scroll...there is no magic here
+
 public:
     EditorView()
     {
-        // Crear el buffer
+        // Create buffer
         buffer = Gtk::TextBuffer::create();
         
-        // Crear el TextView
+        // CreateTextView
         textView = Gtk::make_managed<Gtk::TextView>();
         textView->set_buffer(buffer);
         textView->set_wrap_mode(Gtk::WrapMode::WORD);
         
-        // Crear el ScrolledWindow
+        // Create ScrolledWindow
         scrolled = Gtk::make_managed<Gtk::ScrolledWindow>();
         scrolled->set_child(*textView);
     }
@@ -29,7 +29,7 @@ public:
     Gtk::Widget* GetWidget() { return scrolled; }
     Glib::RefPtr<Gtk::TextBuffer> GetBuffer() { return buffer; }
     
-    // Conectar señal de cambio
+    // change signal conection
     void ConnectOnChanged(std::function<void()> callback)
     {
         buffer->signal_changed().connect(callback);

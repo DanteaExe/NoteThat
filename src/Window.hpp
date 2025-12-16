@@ -10,10 +10,11 @@ private:
     Gtk::ApplicationWindow* window = nullptr;
     
     // Components
-    std::unique_ptr<EditorView> editorView;
-    std::unique_ptr<DocumentManager> docManager;
+    std::unique_ptr<EditorView> editorView; //We need an editor to manage text
+    std::unique_ptr<DocumentManager> docManager; //We need to handle files
 
 private:
+    //Just the menu options
     void SetupMenu()
     {
         auto menu = Gio::Menu::create();
@@ -44,13 +45,15 @@ public:
         // ---- Document Manager ----
         docManager = std::make_unique<DocumentManager>(editorView->GetBuffer());
         
-        // Conectar señal de modificación
+        // conect signal modification
         editorView->ConnectOnChanged([this]() {
+            //If there is modifications on text
             docManager->SetModified(true);
         });
         
-        // Callback para actualizar título al guardar
+        // Callback to update title on save
         docManager->SetOnSaveCallback([this](const std::string& path) {
+            //If file is save or modified
             window->set_title("NoteThat - " + path);
         });
         

@@ -8,10 +8,10 @@ class DocumentManager
 {
 private:
     Glib::RefPtr<Gtk::TextBuffer> buffer;
-    std::string currentFile;
-    bool isModified = false;
+    std::string currentFile; //which file is open?
+    bool isModified = false; //are there changes unsave?
     std::function<void(const std::string&)> onSaveCallback;
-    
+
 private:
     void WriteToFile(const std::string& path)
     {
@@ -36,8 +36,8 @@ private:
 
 public:
     DocumentManager(Glib::RefPtr<Gtk::TextBuffer> buffer)
-        : buffer(buffer)
     {
+        this.buffer = buffer;
     }
 
     // Getters
