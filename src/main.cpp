@@ -3,7 +3,6 @@
 int main()
 {
     auto app = Gtk::Application::create("com.notethat.app");
-
     Window win;
 
     app->signal_activate().connect(
