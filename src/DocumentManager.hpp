@@ -8,8 +8,8 @@ class DocumentManager
 {
 private:
     Glib::RefPtr<Gtk::TextBuffer> buffer;
-    std::string currentFile; // which file is open?
-    bool isModified = false; // are there unsave changes?
+    std::string currentFile; // Which file is opened?
+    bool isModified = false; // Are there unsave changes?
     std::function<void(const std::string&)> onSaveCallback;
 
 private:
@@ -30,7 +30,7 @@ private:
         
         std::cout << "Saved file: " << path << std::endl;
         
-        // Notificar que se guardó exitosamente
+        // Notify that was save successfully
         if (onSaveCallback)
             onSaveCallback(path);
     }
@@ -55,7 +55,7 @@ private:
         
         std::cout << "Opened file: " << path << std::endl;
         
-        // Notificar que se abrió exitosamente
+        // Notify that was opened successfully
         if (onSaveCallback)
             onSaveCallback(path);
     }
@@ -66,20 +66,38 @@ public:
     {
     }
 
-    // Getters
+    // ---- Getters ----
     bool IsModified() const { return isModified; }
     std::string GetCurrentFile() const { return currentFile; }
     
-    // Setters
+    // Get just the filename (not full path)
+    std::string GetFileName() const 
+    {
+        if (currentFile.empty())
+            return "Untitled";
+        
+        // Find last '/' to get just the filename
+        size_t lastSlash = currentFile.find_last_of('/');
+        if (lastSlash != std::string::npos)
+            return currentFile.substr(lastSlash + 1);
+        
+        return currentFile;
+    }
+    
+    std::function<void(const std::string&)> GetOnSaveCallback() const
+    {
+        return onSaveCallback;
+    }
+    
+    // ---- Setters ----
     void SetModified(bool modified) { isModified = modified; }
     
-    // Callback para cuando se guarda/abre exitosamente
     void SetOnSaveCallback(std::function<void(const std::string&)> callback)
     {
         onSaveCallback = callback;
     }
 
-    // File operations
+    // ---- File operations ----
     void Save(Gtk::Window& parent)
     {
         if (currentFile.empty())
@@ -142,5 +160,18 @@ public:
                 }
             }
         );
+    }
+
+    void New()
+    {
+        buffer->set_text("");
+        currentFile.clear();
+        isModified = false;
+        
+        std::cout << "New file created" << std::endl;
+        
+        // Notify to update title
+        if (onSaveCallback)
+            onSaveCallback("");  // Empty path = "Untitled"
     }
 };
