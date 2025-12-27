@@ -6,12 +6,12 @@
 class Window
 {
 private:
-    // ---- Main window ----
+    // Widgets
     Gtk::ApplicationWindow* window = nullptr;
 
-    // ---- Components ----
-    std::unique_ptr<EditorView> editorView;          // Manages text editor UI
-    std::unique_ptr<DocumentManager> docManager;     // Manages files & document state
+    // Components
+    std::unique_ptr<EditorView> editorView;     //We need an editor to manage text
+    std::unique_ptr<DocumentManager> docManager; //We need to handle files
 
 private:
     // ---------------- TITLE UPDATE ----------------
@@ -27,7 +27,7 @@ private:
         window->set_title(title);
     }
 
-    // ---------------- MENU SETUP ----------------
+    //Just the menu options
     void SetupMenu()
     {
         auto menu = Gio::Menu::create();
@@ -135,16 +135,18 @@ public:
             editorView->GetBuffer()
         );
 
-        // Detect text modification
+        // conect signal modification
         editorView->ConnectOnChanged([this]() {
+            //If there is modifications on text
             docManager->SetModified(true);
-            UpdateTitle();  // ← ARREGLADO: Actualiza título con asterisco
+            UpdateTitle();
         });
 
-        // Update title when file is saved or opened
+        // Callback to update title on save
         docManager->SetOnSaveCallback(
             [this](const std::string& path) {
-                UpdateTitle();  // ← ARREGLADO: Usa UpdateTitle() en vez de poner path completo
+                //If file is save or modified
+                UpdateTitle();
             }
         );
 
@@ -155,8 +157,8 @@ public:
         UpdateTitle();
 
         // ---- App actions ----
-        app->add_action("file_new", [this]() {  // ← ARREGLADO: file_new para evitar conflictos
-            docManager->New();
+        app->add_action("file_new", [this]() {
+            docManager->New(*window);
         });
 
         app->add_action("save", [this]() {

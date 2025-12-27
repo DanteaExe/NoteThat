@@ -22,3 +22,18 @@ and this project adheres to Semantic Versioning.
 
 ### Fixed
 - Application closing unexpectedly
+
+## [0.1.1] - 2025-12-26
+### Added
+- File type validation (prevents opening images, videos, PDFs, etc.)
+- Confirmation dialog when opening/creating new file with unsaved changes
+- Visual error dialogs for file operations (read/write failures)
+- File validator component (`FileValidator.hpp`)
+
+### Changed
+- Enhanced error reporting with user-friendly dialogs instead of console-only messages
+
+### Fixed
+- App crash when opening folders or non-text files
+- Confirmation dialog now properly saves before proceeding with Open/New actions
+- File dialog no longer stays open after saving and opening another file
