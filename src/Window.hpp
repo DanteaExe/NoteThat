@@ -35,6 +35,7 @@ private:
         menu->append("Open", "app.open");
         menu->append("Save", "app.save");
         menu->append("Save As", "app.save_as");
+        menu->append("Keyboard Shortcuts", "app.shortcuts");
         menu->append("Quit", "app.quit");
 
         auto header = Gtk::make_managed<Gtk::HeaderBar>();
@@ -113,6 +114,76 @@ private:
         return true;
     }
 
+    // ---------------- KEYBOARD SHORTCUTS ----------------
+    bool OnKeyPressed(guint keyval, guint keycode, Gdk::ModifierType state)
+    {
+        // Check for Ctrl key
+        bool ctrl = (state & Gdk::ModifierType::CONTROL_MASK) != Gdk::ModifierType{};
+        bool shift = (state & Gdk::ModifierType::SHIFT_MASK) != Gdk::ModifierType{};
+
+        // Ctrl+S - Save
+        if (ctrl && !shift && keyval == GDK_KEY_s)
+        {
+            docManager->Save(*window);
+            return true;
+        }
+
+        // Ctrl+Shift+S - Save As
+        if (ctrl && shift && keyval == GDK_KEY_S)
+        {
+            docManager->SaveAs(*window);
+            return true;
+        }
+
+        // Ctrl+O - Open
+        if (ctrl && !shift && keyval == GDK_KEY_o)
+        {
+            docManager->Open(*window);
+            return true;
+        }
+
+        // Ctrl+N - New
+        if (ctrl && !shift && keyval == GDK_KEY_n)
+        {
+            docManager->New(*window);
+            return true;
+        }
+
+        // Ctrl+W or Ctrl+Q - Quit
+        if (ctrl && !shift && (keyval == GDK_KEY_w || keyval == GDK_KEY_q))
+        {
+            window->close();
+            return true;
+        }
+
+        return false; // Let other handlers process the key
+    }
+
+    // ---------------- SHORTCUTS DIALOG ----------------
+    void ShowShortcutsDialog()
+    {
+        auto dialog = Gtk::AlertDialog::create();
+        dialog->set_message("Keyboard Shortcuts");
+        dialog->set_detail(
+            "File Operations:\n"
+            "  Ctrl+N          New file\n"
+            "  Ctrl+O          Open file\n"
+            "  Ctrl+S          Save\n"
+            "  Ctrl+Shift+S    Save As\n"
+            "  Ctrl+W / Ctrl+Q Quit\n"
+            "\n"
+            "Editing:\n"
+            "  Ctrl+C          Copy\n"
+            "  Ctrl+V          Paste\n"
+            "  Ctrl+X          Cut\n"
+            "  Ctrl+Z          Undo\n"
+            "  Ctrl+Y          Redo\n"
+            "  Ctrl+A          Select All"
+        );
+        dialog->set_modal(true);
+        dialog->show(*window);
+    }
+
 public:
     void OnActivate(const Glib::RefPtr<Gtk::Application>& app)
     {
@@ -126,6 +197,13 @@ public:
             sigc::mem_fun(*this, &Window::OnCloseRequest),
             false
         );
+
+        // ---- Keyboard shortcuts ----
+        auto key_controller = Gtk::EventControllerKey::create();
+        key_controller->signal_key_pressed().connect(
+            sigc::mem_fun(*this, &Window::OnKeyPressed), false
+        );
+        window->add_controller(key_controller);
 
         // ---- Editor View ----
         editorView = std::make_unique<EditorView>();
@@ -176,6 +254,11 @@ public:
         // Quit uses the SAME close logic
         app->add_action("quit", [this]() {
             window->close();
+        });
+
+        // Show keyboard shortcuts
+        app->add_action("shortcuts", [this]() {
+            ShowShortcutsDialog();
         });
 
         // ---- Menu ----

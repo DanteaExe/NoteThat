@@ -37,3 +37,9 @@ and this project adheres to Semantic Versioning.
 - App crash when opening folders or non-text files
 - Confirmation dialog now properly saves before proceeding with Open/New actions
 - File dialog no longer stays open after saving and opening another file
+
+## [0.1.2] - 2025-12-31
+### Added
+- Keyboard shortcuts (Ctrl+S, Ctrl+Shift+S, Ctrl+O, Ctrl+N, Ctrl+W, Ctrl+Q)
+- "Keyboard Shortcuts" dialog showing all available shortcuts
+- Keyboard shortcuts menu option in File menu
